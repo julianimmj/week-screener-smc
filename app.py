@@ -502,21 +502,65 @@ def landing_page():
             st.rerun()
     with bcol_mid2:
         if st.button("⏱️ Ver Último Resultado", key="btn_quick", use_container_width=True):
-            if st.session_state.signals_df is None:
-                try:
-                    df_saved = pd.read_csv("latest_scan.csv")
-                    if df_saved.empty:
-                        st.toast("⚠️ Nenhum resultado prévio. Use 'Realizar Novo Screener'.", icon="⚠️")
-                    else:
-                        st.session_state.signals_df = df_saved
-                except Exception:
-                    st.toast("⚠️ Arquivo de resultados não encontrado. Use 'Realizar Novo Screener'.", icon="⚠️")
+            loaded = False
             
-            # Só redireciona se realmente tivermos dados para mostrar
+            # Se já está na memória, não precisa ler de arquivo
             if st.session_state.signals_df is not None:
+                loaded = True
+            else:
+                # 1. Tenta carregar localmente
+                try:
+                    import os
+                    if os.path.exists("latest_scan.csv"):
+                        df_saved = pd.read_csv("latest_scan.csv")
+                        if not df_saved.empty:
+                            st.session_state.signals_df = df_saved
+                            loaded = True
+                            if os.path.exists("latest_run.txt"):
+                                with open("latest_run.txt", "r") as f:
+                                    st.session_state.last_run = datetime.datetime.fromisoformat(f.read().strip())
+                except Exception:
+                    pass
+                
+                # 2. Tenta carregar do GitHub se localmente falhou (ex: reinício de container do Streamlit Cloud)
+                if not loaded:
+                    try:
+                        if "GITHUB_TOKEN" in st.secrets:
+                            import io
+                            from github import Github
+                            gh_token = st.secrets["GITHUB_TOKEN"]
+                            g = Github(gh_token)
+                            repo = g.get_repo("julianimmj/week-screener-smc")
+                            
+                            # Carrega latest_scan.csv
+                            contents = repo.get_contents("latest_scan.csv", ref="main")
+                            csv_data = contents.decoded_content.decode('utf-8')
+                            df_saved = pd.read_csv(io.StringIO(csv_data))
+                            
+                            if not df_saved.empty:
+                                st.session_state.signals_df = df_saved
+                                loaded = True
+                                df_saved.to_csv("latest_scan.csv", index=False)
+                                
+                                # Carrega opcionalmente o timestamp da última execução
+                                try:
+                                    contents_run = repo.get_contents("latest_run.txt", ref="main")
+                                    run_data = contents_run.decoded_content.decode('utf-8').strip()
+                                    st.session_state.last_run = datetime.datetime.fromisoformat(run_data)
+                                    with open("latest_run.txt", "w") as f:
+                                        f.write(run_data)
+                                except Exception:
+                                    pass
+                    except Exception as ex:
+                        st.warning(f"Erro ao sincronizar com GitHub: {ex}")
+            
+            if loaded:
                 st.session_state.active_tab = 'all'
                 st.session_state.page = 'screener'
                 st.rerun()
+            else:
+                st.toast("⚠️ Nenhum resultado prévio encontrado. Use 'Realizar Novo Screener'.", icon="⚠️")
+
 
     # 4 ── Email Registration Form ────────────────────────────────────────────────
     st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
@@ -819,7 +863,6 @@ def screener_page():
         if st.button("🏠  Página Inicial", key="btn_home", use_container_width=True):
             st.session_state.page = 'landing'
             st.session_state.active_tab = 'all'
-            st.session_state.signals_df = None
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown('<div style="height:6px;"></div>', unsafe_allow_html=True)
@@ -878,7 +921,6 @@ Este algoritmo não possui uma "Visão Bifocal" (Macro vs Micro) simultânea. El
         if st.button("← Página Inicial", key="btn_back_top"):
             st.session_state.page = 'landing'
             st.session_state.active_tab = 'all'
-            st.session_state.signals_df = None
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -890,8 +932,40 @@ Este algoritmo não possui uma "Visão Bifocal" (Macro vs Micro) simultânea. El
             try:
                 signals = run_screener('tickers_b3.csv')
                 st.session_state.signals_df = signals
-                signals.to_csv("latest_scan.csv", index=False)
                 st.session_state.last_run = datetime.datetime.now()
+                
+                # Salva localmente
+                signals.to_csv("latest_scan.csv", index=False)
+                with open("latest_run.txt", "w") as f:
+                    f.write(st.session_state.last_run.isoformat())
+                
+                # Salva no GitHub se o token existir
+                try:
+                    if "GITHUB_TOKEN" in st.secrets:
+                        from github import Github
+                        gh_token = st.secrets["GITHUB_TOKEN"]
+                        g = Github(gh_token)
+                        repo = g.get_repo("julianimmj/week-screener-smc")
+                        
+                        csv_content = signals.to_csv(index=False)
+                        run_content = st.session_state.last_run.isoformat()
+                        
+                        # Atualiza/Cria latest_scan.csv no GitHub
+                        try:
+                            contents = repo.get_contents("latest_scan.csv", ref="main")
+                            repo.update_file(contents.path, f"chore: update latest_scan.csv [skip ci]", csv_content, contents.sha, branch="main")
+                        except Exception:
+                            repo.create_file("latest_scan.csv", "chore: create latest_scan.csv [skip ci]", csv_content, branch="main")
+                            
+                        # Atualiza/Cria latest_run.txt no GitHub
+                        try:
+                            contents_run = repo.get_contents("latest_run.txt", ref="main")
+                            repo.update_file(contents_run.path, f"chore: update latest_run.txt [skip ci]", run_content, contents_run.sha, branch="main")
+                        except Exception:
+                            repo.create_file("latest_run.txt", "chore: create latest_run.txt [skip ci]", run_content, branch="main")
+                except Exception as gh_ex:
+                    print(f"Erro ao salvar cache no GitHub: {gh_ex}")
+                    
             except Exception as e:
                 st.error(f"Erro ao executar screener: {e}")
                 st.session_state.signals_df = pd.DataFrame()
