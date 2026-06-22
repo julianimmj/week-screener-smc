@@ -508,7 +508,7 @@ def landing_page():
             if st.session_state.signals_df is not None:
                 loaded = True
             else:
-                # 1. Tenta carregar localmente
+                # 1. Tenta carregar localmente (funciona se o container não reiniciou)
                 try:
                     import os
                     if os.path.exists("latest_scan.csv"):
@@ -522,39 +522,53 @@ def landing_page():
                 except Exception:
                     pass
                 
-                # 2. Tenta carregar do GitHub se localmente falhou (ex: reinício de container do Streamlit Cloud)
+                # 2. Tenta carregar do GitHub (dados commitados pelo Actions ou manualmente)
                 if not loaded:
                     try:
-                        if "GITHUB_TOKEN" in st.secrets:
-                            import io
-                            from github import Github
-                            gh_token = st.secrets["GITHUB_TOKEN"]
-                            g = Github(gh_token)
-                            repo = g.get_repo("julianimmj/week-screener-smc")
-                            
-                            # Carrega latest_scan.csv
-                            contents = repo.get_contents("latest_scan.csv", ref="main")
-                            csv_data = contents.decoded_content.decode('utf-8')
+                        import io
+                        from github import Github
+                        
+                        # Usa token se disponível; caso contrário tenta acesso público
+                        gh_token = st.secrets.get("GITHUB_TOKEN", None) if hasattr(st, 'secrets') else None
+                        g = Github(gh_token) if gh_token else Github()
+                        repo = g.get_repo("julianimmj/week-screener-smc")
+                        
+                        # Tenta branch 'main' primeiro, depois 'master' como fallback
+                        csv_data = None
+                        for branch in ["main", "master"]:
+                            try:
+                                contents = repo.get_contents("latest_scan.csv", ref=branch)
+                                csv_data = contents.decoded_content.decode('utf-8')
+                                break  # Encontrou, sai do loop
+                            except Exception:
+                                continue  # Tenta próximo branch
+                        
+                        if csv_data:
                             df_saved = pd.read_csv(io.StringIO(csv_data))
-                            
                             if not df_saved.empty:
                                 st.session_state.signals_df = df_saved
                                 loaded = True
+                                # Cache local para evitar re-download
                                 df_saved.to_csv("latest_scan.csv", index=False)
                                 
-                                # Carrega opcionalmente o timestamp da última execução
-                                try:
-                                    contents_run = repo.get_contents("latest_run.txt", ref="main")
-                                    run_data = contents_run.decoded_content.decode('utf-8').strip()
-                                    st.session_state.last_run = datetime.datetime.fromisoformat(run_data)
-                                    with open("latest_run.txt", "w") as f:
-                                        f.write(run_data)
-                                except Exception:
-                                    pass
+                                # Carrega o timestamp da última execução
+                                for branch in ["main", "master"]:
+                                    try:
+                                        contents_run = repo.get_contents("latest_run.txt", ref=branch)
+                                        run_data = contents_run.decoded_content.decode('utf-8').strip()
+                                        st.session_state.last_run = datetime.datetime.fromisoformat(run_data)
+                                        with open("latest_run.txt", "w") as f:
+                                            f.write(run_data)
+                                        break
+                                    except Exception:
+                                        continue
                     except Exception as ex:
-                        st.warning(f"Erro ao sincronizar com GitHub: {ex}")
+                        # Silencia erros de rede/API — o toast abaixo já informa o usuário
+                        pass
             
             if loaded:
+                if st.session_state.last_run:
+                    st.toast(f"✅ Resultado carregado — {st.session_state.last_run.strftime('%d/%m/%Y às %H:%M')}", icon="✅")
                 st.session_state.active_tab = 'all'
                 st.session_state.page = 'screener'
                 st.rerun()

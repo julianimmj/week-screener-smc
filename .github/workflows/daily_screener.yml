@@ -1,0 +1,45 @@
+name: Daily SMC Screener
+
+on:
+  schedule:
+    # 05:00 UTC = 02:00 BRT (horário de Brasília)
+    # Baixo tráfego de rede, dados do dia anterior já consolidados pelo Yahoo Finance
+    - cron: '0 5 * * *'
+  workflow_dispatch:  # Permite execução manual via aba Actions
+
+permissions:
+  contents: write  # Necessário para fazer commit dos resultados
+
+jobs:
+  run-screener:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run daily screener
+        run: python run_daily_screener.py
+
+      - name: Commit and push results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add latest_scan.csv latest_run.txt
+          # Só commita se houve mudanças reais
+          git diff --cached --quiet || git commit -m "chore: daily screener update $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
+          git push origin main
