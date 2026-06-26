@@ -1,2 +1,3 @@
 Ticker,Sinal,Tipo,Preço,POI,POI Preço,Zona,SL,TP1,RR,Dist. POI,Nota MTF
-NFLX34,bear,BOS,7.49,OB (MT),10.16,premium,10.9,-2.96,17.73,-26.3%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+NFLX34,bear,BOS,7.41,OB (MT),10.16,premium,10.9,-2.96,17.73,-27.1%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+MSFT34,bear,BOS,76.47,OB (MT),93.43,premium,98.04,-26.64,26.05,-18.2%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
