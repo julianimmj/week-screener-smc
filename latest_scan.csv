@@ -1,7 +1,6 @@
 Ticker,Sinal,Tipo,Preço,POI,POI Preço,Zona,SL,TP1,RR,Dist. POI,Nota MTF
-SMAL11,bull,BOS,103.52,OB (MT),86.67,discount,82.92,140.75,14.42,+19.4%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
-AURE3,bull,CHOCH,10.7,OB (MT),7.59,discount,7.28,16.55,28.9,+41.0%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
-ANIM3,bull,CHOCH,2.08,OB (MT),1.54,discount,1.43,5.8,38.73,+35.1%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
-BMGB4,bull,BOS,5.09,OB (MT),4.79,discount,4.62,5.92,6.65,+6.3%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
-MSFT34,bear,BOS,107.23,OB (MT),119.85,premium,130.7,62.64,5.27,-10.5%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
-TGMA3,bear,CHOCH,33.7,OB (MT),38.92,premium,39.58,22.39,25.05,-13.4%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+FESA4,bear,CHOCH,5.09,OB (MT),8.47,premium,8.91,-2.42,24.75,-39.9%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+EQTL3,bear,CHOCH,35.81,OB (MT),45.3,premium,46.37,-12.6,54.11,-20.9%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+HGCR11,bear,CHOCH,89.67,OB (MT),94.94,premium,97.24,-26.42,52.77,-5.6%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+POMO4,bear,CHOCH,4.32,OB (MT),7.77,premium,7.96,-2.16,52.26,-44.4%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+VLID3,bear,BOS,16.48,OB (MT),25.38,premium,26.07,-7.08,47.04,-35.1%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
