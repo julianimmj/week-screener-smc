@@ -1,1 +1,4 @@
 Ticker,Sinal,Tipo,Preço,POI,POI Preço,Zona,SL,TP1,RR,Dist. POI,Nota MTF
+SMAL11,bull,BOS,105.52,OB (MT),86.67,discount,82.92,140.75,14.42,+21.7%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+TGMA3,bear,CHOCH,35.47,OB (MT),38.92,premium,39.58,22.39,25.05,-8.9%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+MSFT34,bear,BOS,107.62,OB (MT),119.7,premium,130.52,62.55,5.28,-10.1%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
