@@ -1,1 +1,8 @@
 Ticker,Sinal,Tipo,Preço,POI,POI Preço,Zona,SL,TP1,RR,Dist. POI,Nota MTF
+CURY3,bear,BOS,34.52,OB (MT),39.6,premium,40.29,22.93,24.16,-12.8%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+VGIP11,bear,BOS,77.51,OB (MT),77.94,premium,79.12,70.0,6.73,-0.6%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+MSFT34,bear,BOS,110.94,OB (MT),119.7,premium,130.53,62.55,5.28,-7.3%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+VIVA3,bear,BOS,29.45,OB (MT),33.98,premium,35.93,18.03,8.18,-13.3%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+CMIN3,bull,BOS,5.01,OB (MT),3.99,discount,3.76,7.7,16.13,+25.6%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+PCAR3,bear,BOS,3.58,OB (MT),4.41,premium,4.95,1.06,6.2,-18.8%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
+RAIL3,bear,BOS,18.85,OB (MT),22.34,premium,23.25,9.15,14.49,-15.6%,Aguardar CHOCH interno no D1 para confirmar absorção (LTF do W1)
